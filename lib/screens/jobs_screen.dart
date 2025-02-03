@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/job_card.dart';
+import '../screens/profile_screen.dart';
+import '../widgets/bottom_nav_bar.dart';
+import 'filter_pages/saved_page.dart';
+import 'filter_pages/applied_page.dart';
+import 'filter_pages/closed_page.dart';
 
 class JobsScreen extends StatefulWidget {
   const JobsScreen({super.key});
@@ -116,6 +121,23 @@ class _JobsScreenState extends State<JobsScreen> {
     );
   }
 
+  Widget _getFilteredPage() {
+    switch (selectedFilter) {
+      case 'Saved':
+        return const SavedPage();
+      case 'Applied':
+        return const AppliedPage();
+      case 'Closed':
+        return const ClosedPage();
+      default:
+        return ListView.builder(
+          padding: const EdgeInsets.only(top: 16),
+          itemCount: filteredJobs.length,
+          itemBuilder: (context, index) => filteredJobs[index],
+        );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -148,17 +170,14 @@ class _JobsScreenState extends State<JobsScreen> {
                       ],
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[850],
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.person_outline_rounded,
-                      color: Colors.white,
-                      size: 20,
-                    ),
+                  IconButton(
+                    icon: const Icon(Icons.person_outline_rounded),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -245,7 +264,7 @@ class _JobsScreenState extends State<JobsScreen> {
               ),
               
               Expanded(
-                child: filteredJobs.isEmpty
+                child: filteredJobs.isEmpty && selectedFilter == null
                     ? Center(
                         child: Text(
                           'No jobs found',
@@ -255,16 +274,13 @@ class _JobsScreenState extends State<JobsScreen> {
                           ),
                         ),
                       )
-                    : ListView.builder(
-                        padding: const EdgeInsets.only(top: 16),
-                        itemCount: filteredJobs.length,
-                        itemBuilder: (context, index) => filteredJobs[index],
-                      ),
+                    : _getFilteredPage(),
               ),
             ],
           ),
         ),
       ),
+      bottomNavigationBar: const BottomNavBar(currentIndex: 0),
     );
   }
 

@@ -10,6 +10,8 @@ class JobCard extends StatelessWidget {
   final String experience;
   final String salary;
   final Color color;
+  final VoidCallback? onRemove;
+  final String? removeText;
 
   const JobCard({
     super.key,
@@ -19,6 +21,8 @@ class JobCard extends StatelessWidget {
     required this.experience,
     required this.salary,
     required this.color,
+    this.onRemove,
+    this.removeText,
   });
 
   @override
@@ -26,187 +30,228 @@ class JobCard extends StatelessWidget {
     final bool isSpotifyCard = company.toLowerCase() == 'spotify';
     final Color textColor = isSpotifyCard ? Colors.black : Colors.white;
 
-    return Stack(
+    return Column(
       children: [
-        ClipPath(
-          clipper: CardClipper(),
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+        Stack(
+          children: [
+            ClipPath(
+              clipper: CardClipper(),
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildCompanyLogo(isSpotifyCard),
-                          const SizedBox(width: 12),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          Row(
                             children: [
-                              Text(
-                                role,
-                                style: GoogleFonts.plusJakartaSans(
-                                  color: textColor,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                              _buildCompanyLogo(isSpotifyCard),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    role,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      color: textColor,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    company,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      color: textColor.withOpacity(0.9),
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 4),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                _buildChip(location, Icons.location_on_outlined, textColor),
+                                const SizedBox(width: 2),
+                                _buildChip(experience, Icons.school_outlined, textColor),
+                                const SizedBox(width: 2),
+                                _buildChip('Fulltime', Icons.access_time_outlined, textColor),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'UX Designers are the synthesis of design and development. They take Google\'s most innovative product concepts...',
+                            style: GoogleFonts.plusJakartaSans(
+                              color: textColor.withOpacity(0.9),
+                              fontSize: 14,
+                              height: 1.5,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {},
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: Text(
+                              'Read More',
+                              style: GoogleFonts.plusJakartaSans(
+                                color: textColor,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(24),
+                          bottomRight: Radius.circular(24),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.access_time_outlined,
+                                color: Colors.black,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 6),
                               Text(
-                                company,
+                                'Posted 2 days ago',
                                 style: GoogleFonts.plusJakartaSans(
-                                  color: textColor.withOpacity(0.9),
+                                  color: Colors.black,
                                   fontSize: 14,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            _buildChip(location, Icons.location_on_outlined, textColor),
-                            const SizedBox(width: 2),
-                            _buildChip(experience, Icons.school_outlined, textColor),
-                            const SizedBox(width: 2),
-                            _buildChip('Fulltime', Icons.access_time_outlined, textColor),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'UX Designers are the synthesis of design and development. They take Google\'s most innovative product concepts...',
-                        style: GoogleFonts.plusJakartaSans(
-                          color: textColor.withOpacity(0.9),
-                          fontSize: 14,
-                          height: 1.5,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {},
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: Text(
-                          'Read More',
-                          style: GoogleFonts.plusJakartaSans(
-                            color: textColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(24),
-                      bottomRight: Radius.circular(24),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.access_time_outlined,
-                            color: Colors.black,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 6),
                           Text(
-                            'Posted 2 days ago',
+                            salary,
                             style: GoogleFonts.plusJakartaSans(
                               color: Colors.black,
-                              fontSize: 14,
+                              fontSize: 20,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],
                       ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              top: 16,
+              right: 16,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => JobDetailsScreen(
+                        company: company,
+                        role: role,
+                        salary: salary,
+                        color: color,
+                      ),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 27, 27, 40),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.1),
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                       Text(
-                        salary,
+                        'View',
                         style: GoogleFonts.plusJakartaSans(
-                          color: Colors.black,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
                         ),
+                      ),
+                      const SizedBox(width: 14),
+                      const Icon(
+                        Icons.arrow_outward,
+                        color: Colors.white,
+                        size: 20,
                       ),
                     ],
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
-        Positioned(
-          top: 16,
-          right: 16,
-          child: GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => JobDetailsScreen(
-                    company: company,
-                    role: role,
-                    salary: salary,
+        if (onRemove != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4, bottom: 16),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: onRemove,
+                icon: Icon(
+                  removeText?.contains('Unsave') ?? false 
+                      ? Icons.bookmark_remove 
+                      : Icons.close,
+                  size: 20,
+                  color: color,
+                ),
+                label: Text(
+                  removeText ?? 'Remove',
+                  style: GoogleFonts.plusJakartaSans(
                     color: color,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              );
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 27, 27, 40),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.1),
-                  width: 2,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  elevation: 0,
+                  side: BorderSide(color: color, width: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'View',
-                    style: GoogleFonts.plusJakartaSans(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  const Icon(
-                    Icons.arrow_outward,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ],
               ),
             ),
           ),
-        ),
       ],
     );
   }

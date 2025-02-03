@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import '../providers/jobs_provider.dart';
+import '../widgets/job_card.dart';
 
 class JobDetailsScreen extends StatefulWidget {
   final String company;
@@ -22,6 +25,27 @@ class JobDetailsScreen extends StatefulWidget {
 
 class _JobDetailsScreenState extends State<JobDetailsScreen> {
   String? selectedButton;
+  final String location = 'Remote';
+  final String experience = '2-4 years exp.';
+
+  @override
+  void initState() {
+    super.initState();
+    final jobsProvider = Provider.of<JobsProvider>(context, listen: false);
+    final job = JobCard(
+      company: widget.company,
+      role: widget.role,
+      location: location,
+      experience: experience,
+      salary: widget.salary,
+      color: widget.color,
+    );
+    if (jobsProvider.isJobApplied(job)) {
+      selectedButton = 'apply';
+    } else if (jobsProvider.isJobSaved(job)) {
+      selectedButton = 'save';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -345,96 +369,213 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
           ),
         ),
         padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Expanded(
-              child: Container(
+        child: selectedButton == 'apply'
+            ? SizedBox(
+                width: double.infinity,
                 height: 55,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedButton = selectedButton == 'save' ? null : 'save';
-                          });
-                        },
-                        child: Container(
-                          height: 55,
-                          decoration: BoxDecoration(
-                            color: selectedButton == 'save' 
-                                ? const Color.fromARGB(255, 23, 46, 255) 
-                                : Colors.white,
-                            borderRadius: BorderRadius.circular(30),
+                child: GestureDetector(
+                  onTap: () {
+                    final jobsProvider = Provider.of<JobsProvider>(context, listen: false);
+                    final job = JobCard(
+                      company: widget.company,
+                      role: widget.role,
+                      location: location,
+                      experience: experience,
+                      salary: widget.salary,
+                      color: widget.color,
+                    );
+
+                    setState(() {
+                      selectedButton = null;
+                      jobsProvider.removeApplication(job);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Application removed'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      Navigator.pop(context);
+                    });
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 23, 46, 255),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Cancel Application',
+                          style: GoogleFonts.plusJakartaSans(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
                           ),
-                          child: Center(
-                            child: Text(
-                              'Save',
-                              style: GoogleFonts.plusJakartaSans(
-                                color: selectedButton == 'save' ? Colors.white : Colors.black87,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            : Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 55,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: GestureDetector(
+                              onTap: () {
+                                final jobsProvider = Provider.of<JobsProvider>(context, listen: false);
+                                final job = JobCard(
+                                  company: widget.company,
+                                  role: widget.role,
+                                  location: location,
+                                  experience: experience,
+                                  salary: widget.salary,
+                                  color: widget.color,
+                                );
+
+                                setState(() {
+                                  if (selectedButton == 'save') {
+                                    selectedButton = null;
+                                    jobsProvider.unsaveJob(job);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Job removed from saved'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  } else {
+                                    selectedButton = 'save';
+                                    jobsProvider.saveJob(job);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Job saved successfully!'),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                  }
+                                });
+                              },
+                              child: Container(
+                                height: 55,
+                                decoration: BoxDecoration(
+                                  color: selectedButton == 'save' 
+                                      ? const Color.fromARGB(255, 23, 46, 255) 
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        selectedButton == 'save' 
+                                            ? Icons.bookmark 
+                                            : Icons.bookmark_outline,
+                                        color: selectedButton == 'save' ? Colors.white : Colors.black87,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        selectedButton == 'save' ? 'Unsave' : 'Save',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          color: selectedButton == 'save' ? Colors.white : Colors.black87,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      height: 9,
-                      width: 28,
-                      margin: const EdgeInsets.symmetric(horizontal: 1),
-                      color: Colors.white,
-                      alignment: Alignment.center,
-                    ),
-                    Expanded(
-                      flex: 4,
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedButton = selectedButton == 'apply' ? null : 'apply';
-                          });
-                        },
-                        child: Container(
-                          height: 55,
-                          decoration: BoxDecoration(
-                            color: selectedButton == 'apply' 
-                                ? const Color.fromARGB(255, 23, 46, 255) 
-                                : Colors.white,
-                            borderRadius: BorderRadius.circular(30),
+                          Container(
+                            height: 9,
+                            width: 28,
+                            margin: const EdgeInsets.symmetric(horizontal: 1),
+                            color: Colors.white,
+                            alignment: Alignment.center,
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Apply Now',
-                                style: GoogleFonts.plusJakartaSans(
-                                  color: selectedButton == 'apply' ? Colors.white : Colors.black87,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w800,
+                          Expanded(
+                            flex: 4,
+                            child: GestureDetector(
+                              onTap: () {
+                                final jobsProvider = Provider.of<JobsProvider>(context, listen: false);
+                                final job = JobCard(
+                                  company: widget.company,
+                                  role: widget.role,
+                                  location: location,
+                                  experience: experience,
+                                  salary: widget.salary,
+                                  color: widget.color,
+                                );
+
+                                setState(() {
+                                  if (selectedButton == 'apply') {
+                                    selectedButton = null;
+                                    jobsProvider.applyJob(job);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Application submitted successfully!'),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                  }
+                                });
+                              },
+                              child: Container(
+                                height: 55,
+                                decoration: BoxDecoration(
+                                  color: selectedButton == 'apply' 
+                                      ? const Color.fromARGB(255, 23, 46, 255) 
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      selectedButton == 'apply' ? 'Apply Now' : 'Apply Now',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        color: selectedButton == 'apply' ? Colors.white : Colors.black87,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Icon(
+                                      selectedButton == 'apply' 
+                                          ? Icons.arrow_forward_rounded
+                                          : Icons.arrow_forward_rounded,
+                                      color: selectedButton == 'apply' ? Colors.white : Colors.black87,
+                                      size: 20,
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              Icon(
-                                Icons.arrow_forward_rounded,
-                                color: selectedButton == 'apply' ? Colors.white : Colors.black87,
-                                size: 20,
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
