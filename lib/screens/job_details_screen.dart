@@ -528,6 +528,15 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                                 setState(() {
                                   if (selectedButton == 'apply') {
                                     selectedButton = null;
+                                    jobsProvider.removeApplication(job);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Application removed'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  } else {
+                                    selectedButton = 'apply';
                                     jobsProvider.applyJob(job);
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
@@ -550,7 +559,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      selectedButton == 'apply' ? 'Apply Now' : 'Apply Now',
+                                      'Apply Now',
                                       style: GoogleFonts.plusJakartaSans(
                                         color: selectedButton == 'apply' ? Colors.white : Colors.black87,
                                         fontSize: 18,
@@ -559,9 +568,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                                     ),
                                     const SizedBox(width: 8),
                                     Icon(
-                                      selectedButton == 'apply' 
-                                          ? Icons.arrow_forward_rounded
-                                          : Icons.arrow_forward_rounded,
+                                      Icons.arrow_forward_rounded,
                                       color: selectedButton == 'apply' ? Colors.white : Colors.black87,
                                       size: 20,
                                     ),
