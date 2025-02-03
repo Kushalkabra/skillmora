@@ -13,20 +13,19 @@ class SavedPage extends StatelessWidget {
     final savedJobs = jobsProvider.savedJobs;
     
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+        Container(
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(vertical: 24),
           child: Text(
             'Saved Jobs',
             style: GoogleFonts.plusJakartaSans(
               color: Colors.white,
-              fontSize: 24,
+              fontSize: 28,
               fontWeight: FontWeight.w600,
             ),
           ),
         ),
-        const SizedBox(height: 16),
         Expanded(
           child: savedJobs.isEmpty
               ? Center(

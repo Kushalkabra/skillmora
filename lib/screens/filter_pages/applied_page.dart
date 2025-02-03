@@ -13,20 +13,19 @@ class AppliedPage extends StatelessWidget {
     final appliedJobs = jobsProvider.appliedJobs;
     
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+        Container(
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(vertical: 24),
           child: Text(
             'Applied Jobs',
             style: GoogleFonts.plusJakartaSans(
               color: Colors.white,
-              fontSize: 24,
+              fontSize: 28,
               fontWeight: FontWeight.w600,
             ),
           ),
         ),
-        const SizedBox(height: 16),
         Expanded(
           child: appliedJobs.isEmpty
               ? Center(
