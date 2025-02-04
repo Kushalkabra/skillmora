@@ -6,6 +6,8 @@ import '../widgets/bottom_nav_bar.dart';
 import 'filter_pages/saved_page.dart';
 import 'filter_pages/applied_page.dart';
 import 'filter_pages/closed_page.dart';
+import 'package:provider/provider.dart';
+import '../providers/jobs_provider.dart';
 
 class JobsScreen extends StatefulWidget {
   const JobsScreen({super.key});
@@ -79,9 +81,10 @@ class _JobsScreenState extends State<JobsScreen> {
     final query = _searchController.text.toLowerCase();
     setState(() {
       if (query.isEmpty) {
-        filteredJobs = List.from(allJobs);
+        filteredJobs = _getFilteredJobs();
       } else {
-        filteredJobs = allJobs.where((job) {
+        final jobsToFilter = _getFilteredJobs();
+        filteredJobs = jobsToFilter.where((job) {
           final companyMatch = job.company.toLowerCase().contains(query);
           final roleMatch = job.role.toLowerCase().contains(query);
           final locationMatch = job.location.toLowerCase().contains(query);
@@ -91,9 +94,24 @@ class _JobsScreenState extends State<JobsScreen> {
     });
   }
 
+  List<JobCard> _getFilteredJobs() {
+    final jobsProvider = Provider.of<JobsProvider>(context, listen: false);
+    switch (selectedFilter) {
+      case 'Saved':
+        return jobsProvider.savedJobs;
+      case 'Applied':
+        return jobsProvider.appliedJobs;
+      case 'Closed':
+        return []; // Add closed jobs logic if needed
+      default:
+        return allJobs;
+    }
+  }
+
   void _onFilterTap(String filter) {
     setState(() {
       selectedFilter = selectedFilter == filter ? null : filter;
+      _onSearchChanged();
     });
   }
 
@@ -122,13 +140,181 @@ class _JobsScreenState extends State<JobsScreen> {
   }
 
   Widget _getFilteredPage() {
+    final jobsProvider = Provider.of<JobsProvider>(context);
+    final query = _searchController.text.toLowerCase();
+    
     switch (selectedFilter) {
       case 'Saved':
-        return const SavedPage();
+        final savedJobs = jobsProvider.savedJobs;
+        final filteredSavedJobs = query.isEmpty 
+            ? savedJobs 
+            : savedJobs.where((job) {
+                final companyMatch = job.company.toLowerCase().contains(query);
+                final roleMatch = job.role.toLowerCase().contains(query);
+                final locationMatch = job.location.toLowerCase().contains(query);
+                return companyMatch || roleMatch || locationMatch;
+              }).toList();
+                
+        return Column(
+          children: [
+            Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Text(
+                'Saved Jobs',
+                style: GoogleFonts.plusJakartaSans(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            Expanded(
+              child: filteredSavedJobs.isEmpty
+                  ? Center(
+                      child: Text(
+                        savedJobs.isEmpty ? 'No saved jobs yet' : 'No matching jobs found',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: Colors.white54,
+                          fontSize: 16,
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: filteredSavedJobs.length,
+                      itemBuilder: (context, index) {
+                        final job = filteredSavedJobs[index];
+                        return Column(
+                          children: [
+                            JobCard(
+                              company: job.company,
+                              role: job.role,
+                              location: job.location,
+                              experience: job.experience,
+                              salary: job.salary,
+                              color: job.color,
+                            ),
+                            Container(
+                              width: double.infinity,
+                              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  jobsProvider.unsaveJob(job);
+                                  setState(() {});
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: Colors.black,
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                child: Text(
+                                  'Unsave',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+            ),
+          ],
+        );
+
       case 'Applied':
-        return const AppliedPage();
+        final appliedJobs = jobsProvider.appliedJobs;
+        final filteredAppliedJobs = query.isEmpty 
+            ? appliedJobs 
+            : appliedJobs.where((job) {
+                final companyMatch = job.company.toLowerCase().contains(query);
+                final roleMatch = job.role.toLowerCase().contains(query);
+                final locationMatch = job.location.toLowerCase().contains(query);
+                return companyMatch || roleMatch || locationMatch;
+              }).toList();
+
+        return Column(
+          children: [
+            Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Text(
+                'Applied Jobs',
+                style: GoogleFonts.plusJakartaSans(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            Expanded(
+              child: filteredAppliedJobs.isEmpty
+                  ? Center(
+                      child: Text(
+                        appliedJobs.isEmpty ? 'No applied jobs yet' : 'No matching jobs found',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: Colors.white54,
+                          fontSize: 16,
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: filteredAppliedJobs.length,
+                      itemBuilder: (context, index) {
+                        final job = filteredAppliedJobs[index];
+                        return Column(
+                          children: [
+                            JobCard(
+                              company: job.company,
+                              role: job.role,
+                              location: job.location,
+                              experience: job.experience,
+                              salary: job.salary,
+                              color: job.color,
+                            ),
+                            Container(
+                              width: double.infinity,
+                              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  jobsProvider.removeApplication(job);
+                                  setState(() {});
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: Colors.black,
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                child: Text(
+                                  'Remove Application',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+            ),
+          ],
+        );
+
       case 'Closed':
         return const ClosedPage();
+        
       default:
         return ListView.builder(
           padding: const EdgeInsets.only(top: 16),

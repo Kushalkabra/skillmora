@@ -100,7 +100,19 @@ class JobCard extends StatelessWidget {
                             ),
                           ),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => JobDetailsScreen(
+                                    company: company,
+                                    role: role,
+                                    salary: salary,
+                                    color: color,
+                                  ),
+                                ),
+                              );
+                            },
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.zero,
                               minimumSize: Size.zero,
