@@ -8,6 +8,9 @@ import 'filter_pages/applied_page.dart';
 import 'filter_pages/closed_page.dart';
 import 'package:provider/provider.dart';
 import '../providers/jobs_provider.dart';
+import '../models/user_data.dart';
+import '../data/jobs_data.dart';
+import '../models/job_model.dart';
 
 class JobsScreen extends StatefulWidget {
   const JobsScreen({super.key});
@@ -19,48 +22,18 @@ class JobsScreen extends StatefulWidget {
 class _JobsScreenState extends State<JobsScreen> {
   String? selectedFilter;
   final TextEditingController _searchController = TextEditingController();
-  List<JobCard> allJobs = [
-    JobCard(
-      company: 'Google',
-      role: 'Sr. UX Designer',
-      location: 'New York',
-      experience: '3 years exp.',
-      salary: '\$50K/mo',
-      color: const Color.fromARGB(255, 27, 38, 255),
-    ),
-    JobCard(
-      company: 'Microsoft',
-      role: 'Product Designer',
-      location: 'Seattle',
-      experience: '2-4 years exp.',
-      salary: '\$45K/mo',
-      color: const Color.fromARGB(255, 28, 212, 0),  // Microsoft blue
-    ),
-    JobCard(
-      company: 'Apple',
-      role: 'UI/UX Designer',
-      location: 'California',
-      experience: '4+ years exp.',
-      salary: '\$55K/mo',
-      color: const Color.fromARGB(255, 52, 52, 52),  // Dark gray for Apple
-    ),
-    JobCard(
-      company: 'Airbnb',
-      role: 'Project Manager',
-      location: 'Sydney',
-      experience: '1-5 years exp.',
-      salary: '\$25K/mo',
-      color: const Color.fromARGB(255, 253, 10, 55),
-    ),
-    JobCard(
-      company: 'Spotify',
-      role: 'Graphic Designer',
-      location: 'Remote',
-      experience: 'Entry Level',
-      salary: '\$35K/mo',
-      color: const Color.fromARGB(255, 236, 212, 35),
-    ),
-  ];
+  List<JobCard> get allJobs {
+    print("Loading jobs: ${jobsData.length}");
+    return jobsData.map((job) => JobCard(
+      company: job.company,
+      role: job.role,
+      location: job.location,
+      experience: job.experience,
+      salary: job.salary,
+      color: Color(job.color),
+      postedDate: job.postedDate,
+    )).toList();
+  }
   
   List<JobCard> filteredJobs = [];
 
@@ -84,10 +57,10 @@ class _JobsScreenState extends State<JobsScreen> {
         filteredJobs = _getFilteredJobs();
       } else {
         final jobsToFilter = _getFilteredJobs();
-        filteredJobs = jobsToFilter.where((job) {
-          final companyMatch = job.company.toLowerCase().contains(query);
-          final roleMatch = job.role.toLowerCase().contains(query);
-          final locationMatch = job.location.toLowerCase().contains(query);
+        filteredJobs = jobsToFilter.where((jobCard) {
+          final companyMatch = jobCard.company.toLowerCase().contains(query);
+          final roleMatch = jobCard.role.toLowerCase().contains(query);
+          final locationMatch = jobCard.location.toLowerCase().contains(query);
           return companyMatch || roleMatch || locationMatch;
         }).toList();
       }
@@ -117,23 +90,68 @@ class _JobsScreenState extends State<JobsScreen> {
 
   Widget _buildFilterChip(String label) {
     final isSelected = selectedFilter == label;
+    final jobsProvider = Provider.of<JobsProvider>(context);
+    
+    // Get count based on filter type
+    int count = 0;
+    switch (label) {
+      case 'Discover':
+        count = jobsProvider.allJobs.length;
+        break;
+      case 'Saved':
+        count = jobsProvider.savedJobs.length;
+        break;
+      case 'Applied':
+        count = jobsProvider.appliedJobs.length;
+        break;
+      case 'Closed':
+        count = 0;
+        break;
+    }
+
     return GestureDetector(
       onTap: () => _onFilterTap(label),
       child: Container(
         height: 40,
-        padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFF4A3AFF) : Colors.white,
           borderRadius: BorderRadius.circular(24),
         ),
-        child: Text(
-          label,
-          style: GoogleFonts.inter(
-            color: isSelected ? Colors.white : Colors.black,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            height: 1.2,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                color: isSelected ? Colors.white : Colors.black,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            if (count > 0) ...[
+              const SizedBox(width: 4),
+              Container(
+                width: 20,  // Fixed width for the count
+                height: 20, // Fixed height for the count
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: isSelected 
+                      ? Colors.white.withOpacity(0.2)
+                      : Colors.black.withOpacity(0.1),
+                  shape: BoxShape.circle,  // Make it circular
+                ),
+                child: Text(
+                  count.toString(),
+                  style: GoogleFonts.inter(
+                    color: isSelected ? Colors.white : Colors.black,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );
@@ -148,10 +166,10 @@ class _JobsScreenState extends State<JobsScreen> {
         final savedJobs = jobsProvider.savedJobs;
         final filteredSavedJobs = query.isEmpty 
             ? savedJobs 
-            : savedJobs.where((job) {
-                final companyMatch = job.company.toLowerCase().contains(query);
-                final roleMatch = job.role.toLowerCase().contains(query);
-                final locationMatch = job.location.toLowerCase().contains(query);
+            : savedJobs.where((jobCard) {
+                final companyMatch = jobCard.company.toLowerCase().contains(query);
+                final roleMatch = jobCard.role.toLowerCase().contains(query);
+                final locationMatch = jobCard.location.toLowerCase().contains(query);
                 return companyMatch || roleMatch || locationMatch;
               }).toList();
                 
@@ -183,16 +201,30 @@ class _JobsScreenState extends State<JobsScreen> {
                   : ListView.builder(
                       itemCount: filteredSavedJobs.length,
                       itemBuilder: (context, index) {
-                        final job = filteredSavedJobs[index];
+                        final jobCard = filteredSavedJobs[index];
+                        final job = JobModel(
+                          company: jobCard.company,
+                          role: jobCard.role,
+                          location: jobCard.location,
+                          experience: jobCard.experience,
+                          salary: jobCard.salary,
+                          color: jobCard.color.value,
+                          description: '',
+                          requirements: [],
+                          roleDescription: '',
+                          postedDate: jobCard.postedDate,
+                          tags: [],
+                        );
                         return Column(
                           children: [
                             JobCard(
-                              company: job.company,
-                              role: job.role,
-                              location: job.location,
-                              experience: job.experience,
-                              salary: job.salary,
-                              color: job.color,
+                              company: jobCard.company,
+                              role: jobCard.role,
+                              location: jobCard.location,
+                              experience: jobCard.experience,
+                              salary: jobCard.salary,
+                              color: jobCard.color,
+                              postedDate: jobCard.postedDate,
                             ),
                             Container(
                               width: double.infinity,
@@ -232,10 +264,10 @@ class _JobsScreenState extends State<JobsScreen> {
         final appliedJobs = jobsProvider.appliedJobs;
         final filteredAppliedJobs = query.isEmpty 
             ? appliedJobs 
-            : appliedJobs.where((job) {
-                final companyMatch = job.company.toLowerCase().contains(query);
-                final roleMatch = job.role.toLowerCase().contains(query);
-                final locationMatch = job.location.toLowerCase().contains(query);
+            : appliedJobs.where((jobCard) {
+                final companyMatch = jobCard.company.toLowerCase().contains(query);
+                final roleMatch = jobCard.role.toLowerCase().contains(query);
+                final locationMatch = jobCard.location.toLowerCase().contains(query);
                 return companyMatch || roleMatch || locationMatch;
               }).toList();
 
@@ -267,16 +299,30 @@ class _JobsScreenState extends State<JobsScreen> {
                   : ListView.builder(
                       itemCount: filteredAppliedJobs.length,
                       itemBuilder: (context, index) {
-                        final job = filteredAppliedJobs[index];
+                        final jobCard = filteredAppliedJobs[index];
+                        final job = JobModel(
+                          company: jobCard.company,
+                          role: jobCard.role,
+                          location: jobCard.location,
+                          experience: jobCard.experience,
+                          salary: jobCard.salary,
+                          color: jobCard.color.value,
+                          description: '',
+                          requirements: [],
+                          roleDescription: '',
+                          postedDate: jobCard.postedDate,
+                          tags: [],
+                        );
                         return Column(
                           children: [
                             JobCard(
-                              company: job.company,
-                              role: job.role,
-                              location: job.location,
-                              experience: job.experience,
-                              salary: job.salary,
-                              color: job.color,
+                              company: jobCard.company,
+                              role: jobCard.role,
+                              location: jobCard.location,
+                              experience: jobCard.experience,
+                              salary: jobCard.salary,
+                              color: jobCard.color,
+                              postedDate: jobCard.postedDate,
                             ),
                             Container(
                               width: double.infinity,
@@ -341,7 +387,7 @@ class _JobsScreenState extends State<JobsScreen> {
                     text: TextSpan(
                       children: [
                         TextSpan(
-                          text: 'Hello Kabira ',
+                          text: 'Hello ${UserData.userName} ',
                           style: GoogleFonts.inter(
                             color: Colors.white,
                             fontSize: 20,

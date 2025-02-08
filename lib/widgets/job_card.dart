@@ -12,6 +12,7 @@ class JobCard extends StatelessWidget {
   final Color color;
   final VoidCallback? onRemove;
   final String? removeText;
+  final String postedDate;
 
   const JobCard({
     super.key,
@@ -21,14 +22,18 @@ class JobCard extends StatelessWidget {
     required this.experience,
     required this.salary,
     required this.color,
+    required this.postedDate,
     this.onRemove,
     this.removeText,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Calculate if the background is light or dark
+    final bool isLightColor = color.computeLuminance() > 0.5;
+    final Color textColor = isLightColor ? Colors.black : Colors.white;
+
     final bool isSpotifyCard = company.toLowerCase() == 'spotify';
-    final Color textColor = isSpotifyCard ? Colors.black : Colors.white;
 
     return Column(
       children: [
@@ -52,17 +57,20 @@ class JobCard extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              _buildCompanyLogo(isSpotifyCard),
+                              _buildCompanyLogo(isLightColor),
                               const SizedBox(width: 12),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    role,
+                                    role.split(' ').length > 1 
+                                        ? role.split(' ').take(1).join(' ') + '\n' + role.split(' ').skip(1).join(' ')
+                                        : role,
                                     style: GoogleFonts.plusJakartaSans(
                                       color: textColor,
-                                      fontSize: 18,
+                                      fontSize: 22,
                                       fontWeight: FontWeight.w600,
+                                      height: 1.2,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
@@ -128,6 +136,24 @@ class JobCard extends StatelessWidget {
                               ),
                             ),
                           ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.access_time,
+                                color: textColor.withOpacity(0.7),
+                                size: 16,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Posted $postedDate',
+                                style: GoogleFonts.plusJakartaSans(
+                                  color: textColor.withOpacity(0.7),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -152,7 +178,7 @@ class JobCard extends StatelessWidget {
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                'Posted 2 days ago',
+                                'Posted $postedDate',
                                 style: GoogleFonts.plusJakartaSans(
                                   color: Colors.black,
                                   fontSize: 14,
@@ -268,7 +294,7 @@ class JobCard extends StatelessWidget {
     );
   }
 
-  Widget _buildCompanyLogo(bool isSpotifyCard) {
+  Widget _buildCompanyLogo(bool isLightColor) {
     try {
       switch (company.toLowerCase()) {
         case 'google':
@@ -323,7 +349,7 @@ class JobCard extends StatelessWidget {
               width: 24,
               height: 24,
               colorFilter: ColorFilter.mode(
-                isSpotifyCard ? Colors.black : Colors.white,
+                isLightColor ? Colors.black : Colors.white,
                 BlendMode.srcIn,
               ),
             ),

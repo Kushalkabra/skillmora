@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../providers/jobs_provider.dart';
 import '../widgets/job_card.dart';
+import '../models/job_model.dart';
 
 class JobDetailsScreen extends StatefulWidget {
   final String company;
@@ -32,13 +33,18 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
   void initState() {
     super.initState();
     final jobsProvider = Provider.of<JobsProvider>(context, listen: false);
-    final job = JobCard(
+    final job = JobModel(
       company: widget.company,
       role: widget.role,
       location: location,
       experience: experience,
       salary: widget.salary,
-      color: widget.color,
+      color: widget.color.value,
+      description: '',
+      requirements: [],
+      roleDescription: '',
+      postedDate: '',
+      tags: [],
     );
     if (jobsProvider.isJobApplied(job)) {
       selectedButton = 'apply';
@@ -376,13 +382,18 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                 child: GestureDetector(
                   onTap: () {
                     final jobsProvider = Provider.of<JobsProvider>(context, listen: false);
-                    final job = JobCard(
+                    final job = JobModel(
                       company: widget.company,
                       role: widget.role,
                       location: location,
                       experience: experience,
                       salary: widget.salary,
-                      color: widget.color,
+                      color: widget.color.value,
+                      description: '',
+                      requirements: [],
+                      roleDescription: '',
+                      postedDate: '',
+                      tags: [],
                     );
 
                     setState(() {
@@ -439,13 +450,18 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                             child: GestureDetector(
                               onTap: () {
                                 final jobsProvider = Provider.of<JobsProvider>(context, listen: false);
-                                final job = JobCard(
+                                final job = JobModel(
                                   company: widget.company,
                                   role: widget.role,
                                   location: location,
                                   experience: experience,
                                   salary: widget.salary,
-                                  color: widget.color,
+                                  color: widget.color.value,
+                                  description: '',
+                                  requirements: [],
+                                  roleDescription: '',
+                                  postedDate: '',
+                                  tags: [],
                                 );
 
                                 setState(() {
@@ -516,13 +532,18 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                             child: GestureDetector(
                               onTap: () {
                                 final jobsProvider = Provider.of<JobsProvider>(context, listen: false);
-                                final job = JobCard(
+                                final job = JobModel(
                                   company: widget.company,
                                   role: widget.role,
                                   location: location,
                                   experience: experience,
                                   salary: widget.salary,
-                                  color: widget.color,
+                                  color: widget.color.value,
+                                  description: '',
+                                  requirements: [],
+                                  roleDescription: '',
+                                  postedDate: '',
+                                  tags: [],
                                 );
 
                                 setState(() {

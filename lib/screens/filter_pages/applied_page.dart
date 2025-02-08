@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../providers/jobs_provider.dart';
 import '../../widgets/job_card.dart';
+import '../../models/job_model.dart';
 
 class AppliedPage extends StatelessWidget {
   const AppliedPage({super.key});
@@ -40,14 +41,28 @@ class AppliedPage extends StatelessWidget {
               : ListView.builder(
                   itemCount: appliedJobs.length,
                   itemBuilder: (context, index) {
-                    final job = appliedJobs[index];
+                    final jobCard = appliedJobs[index];
+                    final job = JobModel(
+                      company: jobCard.company,
+                      role: jobCard.role,
+                      location: jobCard.location,
+                      experience: jobCard.experience,
+                      salary: jobCard.salary,
+                      color: jobCard.color.value,
+                      description: '',
+                      requirements: [],
+                      roleDescription: '',
+                      postedDate: jobCard.postedDate,
+                      tags: [],
+                    );
                     return JobCard(
-                      company: job.company,
-                      role: job.role,
-                      location: job.location,
-                      experience: job.experience,
-                      salary: job.salary,
-                      color: job.color,
+                      company: jobCard.company,
+                      role: jobCard.role,
+                      location: jobCard.location,
+                      experience: jobCard.experience,
+                      salary: jobCard.salary,
+                      color: jobCard.color,
+                      postedDate: jobCard.postedDate,
                       removeText: 'Remove Application',
                       onRemove: () {
                         jobsProvider.removeApplication(job);
